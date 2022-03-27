@@ -3,9 +3,11 @@ import sys
 from bs4 import BeautifulSoup as BS
 import requests
 from config import SOURCE_URL
-from typing import Dict
+from typing import Dict, OrderedDict
 import logging, sys
 from logging import StreamHandler
+import config
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -30,17 +32,38 @@ class Crawler:
     def get_posts(self):
         pass
 
-class Olixer(Crawler):
-    def __init__(self, param, user_id: int):
-        super().__init__(param)
-        self.user_id = user_id
-        self.source_html = self.source_page()
 
-    def last_post(self):
-        # print(self.source_html)
-        last_id = self.source_html.select('table#offers_table h3>a', limit=2, href=True)
-        logger.debug(last_id, self.user_id)
-        print(last_id[1]['href'])
+    def correct_address(self, address):
+        return True
+
+class Olixer(Crawler):
+    def __init__(self, param):
+        super().__init__(param)
+
+        self.posts = {}
+        self.initialization()
+
+    def initialization(self):
+        self.posts['urls'] = []
+        self.posts['urls_top'] = []
+
+    def new_posts(self):
+        self.source_html = self.source_page()
+        urls = self.source_html.select('table#offers_table h3>a', limit=10, href=True)
+        urls_top = self.source_html.select('table.offers--top h3>a', limit=8, href=True)
+        for url in urls:
+            if url['href'] == 'db':
+                break
+            self.posts['urls'].append(url['href'])
+
+        for url in urls_top:
+            if url['href'] == 'db':
+                break
+            self.posts['urls_top'].append(url['href'])
+
+        return self.posts
+
+        #print(urls[1]['href'])
 
     def get_text(self):
         pass
