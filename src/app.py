@@ -54,6 +54,9 @@ async def unsubscribe(message: types.Message):
     db.add_filters(olx_query, message.from_user.id)
     await message.answer('Your filters successfully added')
 
+async def scrapi():
+    all_queries = db.get_all_query()
+    new_posts = crawler.get_posts(all_queries)
 
 async def scheduled(wait_for):
     pass

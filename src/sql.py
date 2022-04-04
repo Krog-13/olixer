@@ -10,19 +10,4 @@ query_filter = "INSERT INTO filters (query_post, user_id) VALUES (%s, %s)"
 query_filter_update = "UPDATE filters SET query_post = %s WHERE user_id = %s"
 query_update = "UPDATE subscribers SET status = %s WHERE personal_uid = %s"
 query_update_f = "UPDATE subscribers SET filters_id = %s WHERE personal_uid = %s"
-query_get_filters = "SELECT query_post, last_post, user_id FROM filters"
-
-tables  =""" 'CREATE TABLE "filters" (
-  "id" SERIAL PRIMARY KEY,
-  "query_post" VARCHAR(200) UNIQUE,
-  "last_post" VARCHAR(200)
-);
-
-CREATE TABLE "subscribers" (
-  "id" SERIAL PRIMARY KEY,
-  "personal_uid" VARCHAR(30) NOT NULL,
-  "status" BOOLEAN,
-  "filters_id" INTEGER,
-	CONSTRAINT FK_subscribers_filter FOREIGN KEY (filters_id)
-	REFERENCES filters(id)
-);"""
+query_get_filters = "SELECT query_post, last_post, top_post, user_id FROM filters"

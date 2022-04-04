@@ -17,28 +17,24 @@ logger.debug('start')
 
 class Crawler:
 
-    def __init__(self, param: Dict):
+    def __init__(self):
         self.source_url = SOURCE_URL
-        self.param = param
 
-    def source_page(self):
+    def source_page(self, page):
         try:
-            source_page = requests.get(self.source_url + self.param.get('address'))
-            print(source_page.status_code)
+            source_page = requests.get(page)
         except requests.exceptions.RequestException as e:
             raise SystemExit(e)
         return BS(source_page.content, 'lxml')
 
-    def get_posts(self):
-        pass
 
 
     def correct_address(self, address):
         return True
 
 class Olixer(Crawler):
-    def __init__(self, param):
-        super().__init__(param)
+    def __init__(self, param=None):
+        super().__init__()
 
         self.posts = {}
         self.initialization()
@@ -47,23 +43,23 @@ class Olixer(Crawler):
         self.posts['urls'] = []
         self.posts['urls_top'] = []
 
-    def new_posts(self):
-        self.source_html = self.source_page()
+    def new_posts(self, page):
+        self.source_html = self.source_page(page)
         urls = self.source_html.select('table#offers_table h3>a', limit=10, href=True)
         urls_top = self.source_html.select('table.offers--top h3>a', limit=8, href=True)
         for url in urls:
-            if url['href'] == 'db':
-                break
             self.posts['urls'].append(url['href'])
-
         for url in urls_top:
-            if url['href'] == 'db':
-                break
             self.posts['urls_top'].append(url['href'])
-
         return self.posts
 
-        #print(urls[1]['href'])
+
+    def get_posts(self, all_queries):
+        for page in all_queries:
+            source = self.new_posts(page['query_post'])
+
+
+
 
     def get_text(self):
         pass
