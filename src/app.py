@@ -1,10 +1,11 @@
+import asyncio
 import logging
 from aiogram import Bot, Dispatcher, executor, types
 import config
 from sqliter import Database
 from olx import Olixer
 logging.basicConfig(level=logging.INFO)
-
+from loguru import logger as LOGGER
 bot = Bot(token=config.API_KEY)
 dp = Dispatcher(bot)
 
@@ -56,10 +57,33 @@ async def unsubscribe(message: types.Message):
 
 async def scrapi():
     all_queries = db.get_all_query()
-    new_posts = crawler.get_posts(all_queries)
+    new_posts = crawler.get_posts(all_queries).__next__()
+    return new_posts
+@dp.message_handler(commands=['go'])
+async def go(message: types.Message):
+    await message.answer('go')
+
 
 async def scheduled(wait_for):
-    pass
+    while True:
+        # time out
+        await asyncio.sleep(wait_for)
+        posts = await scrapi()
+        if not posts['urls']:
+            LOGGER.debug('Not post')
+            continue
+        new_url = posts['urls'][0]
+        id = posts['id']
+        db.update_filters(new_url, id)
+        LOGGER.debug(len(posts['urls']))
+        for url in posts['urls']:
+            one = crawler.get_info_post(url)
+            await bot.send_message(
+                838019137, text=one[0].text)
+
 
 if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.create_task(scheduled(20))
     executor.start_polling(dp, skip_updates=True)
+

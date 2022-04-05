@@ -1,5 +1,5 @@
 import sys
-
+from loguru import logger as LOGGER
 from bs4 import BeautifulSoup as BS
 import requests
 from config import SOURCE_URL
@@ -7,7 +7,6 @@ from typing import Dict, OrderedDict
 import logging, sys
 from logging import StreamHandler
 import config
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -35,34 +34,36 @@ class Crawler:
 class Olixer(Crawler):
     def __init__(self, param=None):
         super().__init__()
-
         self.posts = {}
         self.initialization()
 
     def initialization(self):
         self.posts['urls'] = []
-        self.posts['urls_top'] = []
+        self.posts['id'] = None
 
     def new_posts(self, page):
-        self.source_html = self.source_page(page)
-        urls = self.source_html.select('table#offers_table h3>a', limit=10, href=True)
-        urls_top = self.source_html.select('table.offers--top h3>a', limit=8, href=True)
+        self.source_html = self.source_page(page['query_post'])
+        urls = self.source_html.select('table#offers_table h3>a[href]', limit=10, href=True)
+        # urls_top = self.source_html.select('table.offers--top h3>a', limit=8, href=True)
         for url in urls:
+            if url['href'] == page['last_post']:
+                break
             self.posts['urls'].append(url['href'])
-        for url in urls_top:
-            self.posts['urls_top'].append(url['href'])
+        self.posts['id'] = page['user_id']
         return self.posts
 
 
     def get_posts(self, all_queries):
         for page in all_queries:
-            source = self.new_posts(page['query_post'])
+            posts = self.new_posts(page)
+            yield posts
 
 
 
 
-    def get_text(self):
-        pass
+    def get_info_post(self, url):
+        self.source_html = self.source_page(url)
+        return self.source_html.select('h1[data-cy="ad_title"]')
     def get_datetime(self):
         pass
 

@@ -20,7 +20,8 @@ class Database:
                     host=self.host,
                     user=self.username,
                     password=self.password,
-                    dbname=self.dbname
+                    dbname=self.dbname,
+                    port=self.port
                 )
             except psycopg2.DatabaseError as e:
                 LOGGER.error(e)
@@ -59,6 +60,15 @@ class Database:
         self.connect()
         with self.conn.cursor() as cur:
             cur.execute(query)
+            self.conn.commit()
+            cur.close()
+            return f"{cur.rowcount} rows affected"
+
+    def update_filters(self, simple,uid):
+        """Run SQL query to update rows in table"""
+        self.connect()
+        with self.conn.cursor() as cur:
+            cur.execute(sql.query_update_filters, (simple, uid))
             self.conn.commit()
             cur.close()
             return f"{cur.rowcount} rows affected"
