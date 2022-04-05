@@ -79,7 +79,7 @@ async def scheduled(wait_for):
         for url in posts['urls']:
             one = crawler.get_info_post(url)
             await bot.send_message(
-                838019137, text=one[0].text)
+                838019137, text=one['title']+'\t'+one['price']+'\t'+one['text'])
 
 
 if __name__ == '__main__':

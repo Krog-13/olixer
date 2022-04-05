@@ -36,12 +36,15 @@ class Olixer(Crawler):
         super().__init__()
         self.posts = {}
         self.initialization()
+        self.data = {}
 
     def initialization(self):
         self.posts['urls'] = []
         self.posts['id'] = None
+        self.data = {}
 
     def new_posts(self, page):
+        self.initialization()
         self.source_html = self.source_page(page['query_post'])
         urls = self.source_html.select('table#offers_table h3>a[href]', limit=10, href=True)
         # urls_top = self.source_html.select('table.offers--top h3>a', limit=8, href=True)
@@ -52,18 +55,20 @@ class Olixer(Crawler):
         self.posts['id'] = page['user_id']
         return self.posts
 
-
     def get_posts(self, all_queries):
         for page in all_queries:
             posts = self.new_posts(page)
             yield posts
 
-
-
-
     def get_info_post(self, url):
         self.source_html = self.source_page(url)
-        return self.source_html.select('h1[data-cy="ad_title"]')
+        title = self.source_html.select('h1[data-cy="ad_title"]')[0].text
+        text = self.source_html.select(config.selector.get('text'))[0].text
+        price = self.source_html.select(config.selector.get('price'))[0].text
+        self.data['title'] = title
+        self.data['text'] = text
+        self.data['price'] = price
+        return self.data
     def get_datetime(self):
         pass
 

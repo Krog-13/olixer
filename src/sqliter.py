@@ -120,7 +120,6 @@ class Database:
         with self.conn.cursor(cursor_factory=RealDictCursor) as curs:
             curs.execute(sql.query_get_filters)
             record = curs.fetchall()
-            curs.close()
         return record
 
     def close(self):
