@@ -78,8 +78,13 @@ async def scheduled(wait_for):
         LOGGER.debug(len(posts['urls']))
         for url in posts['urls']:
             one = crawler.get_info_post(url)
-            await bot.send_message(
-                838019137, text=one['title']+'\t'+one['price']+'\t'+one['text'])
+            photo = open('static/fon.png', 'rb')
+            await bot.send_photo(
+                838019137,
+                photo,
+                caption=one['title'] + '\n' + 'Цена:' + one['price'] + 'От:' + '\nОписание:'
+                        + one['text'].strip()[:400] + url, disable_notification=True)
+            photo.close()
 
 
 if __name__ == '__main__':
