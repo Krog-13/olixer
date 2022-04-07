@@ -1,43 +1,31 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
+
+import config
 import sql
+import asyncio
 import logging
 logging.basicConfig(level=logging.INFO)
+from databases import Database as DB
+
+database = DB('postgresql:spoon:spoon//127.0.0.1/project',)
+
+
+
 
 class Database:
-    def __init__(self, config):
-        self.host = config.DATABASE_HOST
-        self.username = config.DATABASE_USERNAME
-        self.password = config.DATABASE_PASSWORD
-        self.port = config.DATABASE_PORT
-        self.dbname = config.DATABASE_NAME
-        self.conn = None
+    def __init__(self):
+        # self.conn = DB(config.DB_URL)
+        self.conn = DB('postgresql://spoon:spoon@127.0.0.1:5432/project')
+        print('connection ok')
 
-    def connect(self):
-        """Connect to a postgres database"""
-        if not self.conn:
-            try:
-                self.conn = psycopg2.connect(
-                    host=self.host,
-                    user=self.username,
-                    password=self.password,
-                    dbname=self.dbname,
-                    port=self.port
-                )
-            except psycopg2.DatabaseError as e:
-                logging.error(e)
-                raise e
-            finally:
-                logging.debug('Connection opened successfully')
-
-    def last_post(self, vars=None):
+    async def connect(self):
+        await self.conn.connect()
+    async def last_post(self, vars=None):
         """Run SQL query to select rows from table"""
-        self.connect()
-        with self.conn.cursor() as cur:
-            cur.execute(sql.query_url, vars=vars)
-            record = cur.fetchone()
-            cur.close()
-            return record
+        record1 = await self.conn.execute(sql.table1)
+        # record2 = await self.conn.execute(sql.table2)
+
 
     def inset_post(self):
         """Run SQL query to select rows from table"""
@@ -125,3 +113,7 @@ class Database:
 
     def close(self):
         self.conn.close()
+
+if __name__ == '__main__':
+    db = Database()
+    asyncio.run(db.connect())

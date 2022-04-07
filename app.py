@@ -10,16 +10,7 @@ from olx import Olixer
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=config.API_KEY)
 dp = Dispatcher(bot)
-HEROKU_APP_NAME = os.getenv('HEROKU_APP_NAME')
 
-# webhook setting
-WEBHOOK_HOST = f'https://{HEROKU_APP_NAME}.herokuapp.com'
-WEBHOOK_PATH = f'/webhook/{config.API_KEY}'
-WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
-
-# webserver setting
-WEBAPP_HOST = '0.0.0.0'
-WEBAPP_PORT = os.getenv('PORT', default=5000)
 
 
 
@@ -32,9 +23,11 @@ param={}
 crawler = Olixer(param)
 
 async def on_startup(dispatcher):
-    await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True)
+    await db.conn.connect()
+    await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True)
 
 async def on_shutdown(dispatcher):
+    await db.conn.disconnect()
     await bot.delete_webhook()
 
 
@@ -112,12 +105,12 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     start_webhook(
         dispatcher=dp,
-        webhook_path=WEBHOOK_PATH,
+        webhook_path=config.WEBHOOK_PATH,
         skip_updates=True,
         on_startup=on_startup,
         on_shutdown=on_shutdown,
-        host=WEBAPP_HOST,
-        port=WEBAPP_PORT
+        host=config.WEBAPP_HOST,
+        port=config.WEBAPP_PORT
     )
 
     loop = asyncio.get_event_loop()

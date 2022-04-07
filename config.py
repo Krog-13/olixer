@@ -1,6 +1,6 @@
 from os import environ, path
 from dotenv import load_dotenv
-
+import os
 # Load variables from .env
 basedir = path.abspath(path.dirname(__file__))
 load_dotenv(path.join(basedir, '.env'))
@@ -28,5 +28,18 @@ selector = {
     'datetime': 'span[data-cy="ad-posted-at"]',
     'price': 'div[data-testid="ad-price-container"]>h3',
 }
+
+HEROKU_APP_NAME = os.getenv('HEROKU_APP_NAME')
+
+# webhook setting
+WEBHOOK_HOST = f'https://{HEROKU_APP_NAME}.herokuapp.com'
+WEBHOOK_PATH = f'/webhook/{API_KEY}'
+WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
+DB_URL = os.getenv('DATABASE_URL')
+
+# webserver setting
+WEBAPP_HOST = '0.0.0.0'
+WEBAPP_PORT = os.getenv('PORT', default=5000)
+
 
 # start pgadmin-web sudo /usr/pgadmin4/bin/setup-web.sh
