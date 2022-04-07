@@ -16,7 +16,8 @@ database = DB('postgresql:spoon:spoon//127.0.0.1/project',)
 class Database:
     def __init__(self):
         # self.conn = DB(config.DB_URL)
-        self.conn = DB('postgresql://spoon:spoon@127.0.0.1:5432/project')
+        # self.conn = DB('postgresql://spoon:spoon@127.0.0.1:5432/project')
+        self.conn = DB('postgres://fdhorobeymcpbn:d5c20ca6f5e9d72877d001f43678f0a0cea915cf5493347a4ff454d23022ebc3@ec2-63-32-248-14.eu-west-1.compute.amazonaws.com:5432/db9ob7a7v7mqhc')
         print('connection ok')
 
     async def connect(self):
@@ -24,7 +25,7 @@ class Database:
     async def last_post(self, vars=None):
         """Run SQL query to select rows from table"""
         record1 = await self.conn.execute(sql.table1)
-        # record2 = await self.conn.execute(sql.table2)
+        record2 = await self.conn.execute(sql.table2)
 
 
     def inset_post(self):
