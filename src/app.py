@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.utils.markdown import link
 import config
 from sqliter import Database
 from olx import Olixer
@@ -19,7 +20,7 @@ crawler = Olixer(param)
 
 @dp.message_handler(commands=['start', 'help'])
 async def send_message(message: types.Message):
-    await message.reply("Hi everybody")
+    await message.reply(link('link', 'www.google.com'), parse_mode='markdown')
 
 # command subscribe
 @dp.message_handler(commands=['subscribe'])
@@ -83,12 +84,12 @@ async def scheduled(wait_for):
                 838019137,
                 photo,
                 caption=one['title'] + '\n' + 'Цена:' + one['price'] + 'От:' + '\nОписание:'
-                        + one['text'].strip()[:400] + url, disable_notification=True)
+                        + one['text'].strip()[:400] + link('clik', url), disable_notification=True, parse_mode='markdown')
             photo.close()
 
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.create_task(scheduled(20))
+    loop.create_task(scheduled(10))
     executor.start_polling(dp, skip_updates=True)
 

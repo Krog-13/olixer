@@ -1,14 +1,11 @@
-import psycopg2
-from loguru import logger as LOGGER
-from psycopg2.extras import RealDictCursor
+import sqlite3
 import sql
+import logging
+import config
+LOGGER = logging.getLogger(__name__)
 
 class Database:
     def __init__(self, config):
-        self.host = config.DATABASE_HOST
-        self.username = config.DATABASE_USERNAME
-        self.password = config.DATABASE_PASSWORD
-        self.port = config.DATABASE_PORT
         self.dbname = config.DATABASE_NAME
         self.conn = None
 
@@ -16,17 +13,13 @@ class Database:
         """Connect to a postgres database"""
         if not self.conn:
             try:
-                self.conn = psycopg2.connect(
-                    host=self.host,
-                    user=self.username,
-                    password=self.password,
-                    dbname=self.dbname,
-                    port=self.port
-                )
-            except psycopg2.DatabaseError as e:
+                self.conn = sqlite3.connect(self.dbname)
+            except sqlite3.DatabaseError as e:
                 LOGGER.error(e)
                 raise e
             finally:
+                # self.conn.execute(sql.up)
+                # self.conn.execute(sql.up1)
                 LOGGER.info('Connection opened successfully')
 
     def last_post(self, vars=None):
@@ -50,7 +43,7 @@ class Database:
 
     def select_row_dict(self, query):
         self.connect()
-        with self.conn.cursor(cursor_factory=RealDictCursor) as curs:
+        with self.conn.cursor() as curs:
             curs.execute(query)
             record = curs.fetchall()
         return record
@@ -67,28 +60,29 @@ class Database:
     def update_filters(self, simple,uid):
         """Run SQL query to update rows in table"""
         self.connect()
-        with self.conn.cursor() as cur:
-            cur.execute(sql.query_update_filters, (simple, uid))
-            self.conn.commit()
-            cur.close()
-            return f"{cur.rowcount} rows affected"
+        curs = self.conn.cursor()
+        curs.execute(sql.query_update_filters, (simple, uid))
+        self.conn.commit()
+        curs.close()
+        return f"{curs.rowcount} rows affected"
 
     def subscriber_exists(self, user_uid):
         """Run SQL query to check exists user"""
         self.connect()
-        with self.conn.cursor() as curs:
-            curs.execute(sql.query_exists, (user_uid, ))
-            record = curs.fetchone()
+        self.conn.row_factory = sqlite3.Row
+        curs = self.conn.cursor()
+        curs.execute(sql.query_exists, (user_uid, ))
+        record = curs.fetchone()
         return record
 
     def add_subscriber(self, user_uid, status):
         """Run SQL query to check exists user"""
         self.connect()
-        with self.conn.cursor() as curs:
-            curs.execute(sql.query_add, (user_uid, status))
-            self.conn.commit()
-            curs.close()
-        return True
+        self.conn.row_factory = sqlite3.Row
+        curs = self.conn.cursor()
+        curs.execute(sql.query_add, (user_uid, status))
+        self.conn.commit()
+        curs.close()
 
     def update_subscription(self, user_uid, status):
         """Run SQL query to check exists user"""
@@ -103,24 +97,30 @@ class Database:
     def add_filters(self, olx_query, user_uid):
         """Run SQL query to add filter"""
         self.connect()
-        with self.conn.cursor() as curs:
-            curs.execute("SELECT id FROM subscribers WHERE personal_uid=%s", (user_uid, ))
-            id = curs.fetchone()
-            curs.execute('SELECT * FROM filters WHERE user_id=%s', id)
-            exists_filter = curs.fetchone()
-            if exists_filter:
-                curs.execute(sql.query_filter_update, (olx_query, id[0]))
-            else:
-                curs.execute(sql.query_filter, (olx_query, id))
-            self.conn.commit()
-            curs.close()
+        self.conn.row_factory = sqlite3.Row
+        curs = self.conn.cursor()
+        curs.execute("SELECT id FROM subscribers WHERE personal_uid=?", (user_uid, ))
+        id = curs.fetchone()
+        curs.execute('SELECT * FROM filters WHERE user_id=?', (id[0], ))
+        exists_filter = curs.fetchone()
+        if exists_filter:
+            curs.execute(sql.query_filter_update, (olx_query, id[0]))
+        else:
+            curs.execute(sql.query_filter, (olx_query, id[0]))
+        self.conn.commit()
+        curs.close()
 
     def get_all_query(self):
         self.connect()
-        with self.conn.cursor(cursor_factory=RealDictCursor) as curs:
-            curs.execute(sql.query_get_filters)
-            record = curs.fetchall()
+        self.conn.row_factory = sqlite3.Row
+        curs = self.conn.cursor()
+        curs.execute(sql.query_get_filters)
+        record = curs.fetchall()
         return record
 
     def close(self):
         self.conn.close()
+
+if __name__ == '__main__':
+    db = Database(config)
+    db.connect()
