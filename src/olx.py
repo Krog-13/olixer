@@ -1,5 +1,4 @@
 import sys
-from loguru import logger as LOGGER
 from bs4 import BeautifulSoup as BS
 import requests
 from config import SOURCE_URL
@@ -82,7 +81,7 @@ class Olixer(Crawler):
     def _extract_string(self, selector):
         item = self.source_html.select(selector)
         if not item:
-            LOGGER.info('Not title')
+            logging.info('Not title')
             return ''
         return item[0].text
     # def _extract_text(self, selector):
@@ -101,7 +100,6 @@ class Olixer(Crawler):
     def _extract_all(self, selector, name):
         item = self.source_html.select(selector)
         if not item:
-            LOGGER.debug(f'not found {name}')
             return '*-*'
         return item[0].text
 

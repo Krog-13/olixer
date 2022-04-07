@@ -1,13 +1,28 @@
 import asyncio
 import logging
+import os
+
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.utils.executor import start_webhook
 import config
 from sqliter import Database
 from olx import Olixer
 logging.basicConfig(level=logging.INFO)
-from loguru import logger as LOGGER
 bot = Bot(token=config.API_KEY)
 dp = Dispatcher(bot)
+HEROKU_APP_NAME = os.getenv('HEROKU_APP_NAME')
+
+# webhook setting
+WEBHOOK_HOST = f'https://{HEROKU_APP_NAME}.herokuapp.com'
+WEBHOOK_PATH = f'/webhook/{config.API_KEY}'
+WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
+
+# webserver setting
+WEBAPP_HOST = '0.0.0.0'
+WEBAPP_PORT = os.getenv('PORT', default=5000)
+
+
+
 
 # initialization Database
 db = Database(config)
@@ -15,6 +30,13 @@ db = Database(config)
 # initialization parser
 param={}
 crawler = Olixer(param)
+
+async def on_startup(dispatcher):
+    await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True)
+
+async def on_shutdown(dispatcher):
+    await bot.delete_webhook()
+
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -70,12 +92,11 @@ async def scheduled(wait_for):
         await asyncio.sleep(wait_for)
         posts = await scrapi()
         if not posts['urls']:
-            LOGGER.debug('Not post')
             continue
         new_url = posts['urls'][0]
         id = posts['id']
         db.update_filters(new_url, id)
-        LOGGER.debug(len(posts['urls']))
+        logging.info(len(posts['urls']))
         for url in posts['urls']:
             one = crawler.get_info_post(url)
             photo = open('static/fon.png', 'rb')
@@ -88,6 +109,17 @@ async def scheduled(wait_for):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    start_webhook(
+        dispatcher=dp,
+        webhook_path=WEBHOOK_PATH,
+        skip_updates=True,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        host=WEBAPP_HOST,
+        port=WEBAPP_PORT
+    )
+
     loop = asyncio.get_event_loop()
     loop.create_task(scheduled(20))
     executor.start_polling(dp, skip_updates=True)

@@ -1,7 +1,8 @@
 import psycopg2
-from loguru import logger as LOGGER
 from psycopg2.extras import RealDictCursor
 import sql
+import logging
+logging.basicConfig(level=logging.INFO)
 
 class Database:
     def __init__(self, config):
@@ -24,10 +25,10 @@ class Database:
                     port=self.port
                 )
             except psycopg2.DatabaseError as e:
-                LOGGER.error(e)
+                logging.error(e)
                 raise e
             finally:
-                LOGGER.info('Connection opened successfully')
+                logging.debug('Connection opened successfully')
 
     def last_post(self, vars=None):
         """Run SQL query to select rows from table"""
