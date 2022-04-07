@@ -78,7 +78,7 @@ class Database:
         """Run SQL query to check exists user"""
         self.connect()
         with self.conn.cursor() as curs:
-            curs.execute(sql.query_exists, (user_uid, ))
+            curs.execute(sql.query_exists, (user_uid,))
             record = curs.fetchone()
         return record
 

@@ -1,8 +1,6 @@
-import sys
 from bs4 import BeautifulSoup as BS
 import requests
 from config import SOURCE_URL
-from typing import Dict, OrderedDict
 import logging, sys
 from logging import StreamHandler
 import config
