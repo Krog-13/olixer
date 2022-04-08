@@ -61,7 +61,6 @@ class Olixer(Crawler):
 
     def get_posts(self, all_queries):
         for page in all_queries:
-            print(page)
             posts = self.new_posts(page)
             yield posts
 
@@ -83,18 +82,6 @@ class Olixer(Crawler):
             logging.info('Not title')
             return ''
         return item[0].text
-    # def _extract_text(self, selector):
-    #     item = self.source_html.select(selector)[0].text
-    #     return item
-    # def _extract_datetime(self, selector):
-    #     item = self.source_html.select(selector)[0].text
-    #     return item
-    # def _extract_price(self, selector):
-    #     item = self.source_html.select(selector)[0].text
-    #     return item
-    # def _extract_author(self, selector):
-    #     item = self.source_html.select(selector)[0].text
-    #     return item
 
     def _extract_all(self, selector, name):
         item = self.source_html.select(selector)

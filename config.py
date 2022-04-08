@@ -21,7 +21,7 @@ query_url = "ELECT url FROM urls WHERE type_url=%(type)s"
 arg_url = {'type':'simple'}
 
 selector = {
-    'title': 'h1[data-cy="ad_titleee"]',
+    'title': 'h1[data-cy="ad_title"]',
     'text': 'div[data-cy="ad_description"]>div',
     'datetime': 'span[data-cy="ad-posted-at"]',
     'price': 'div[data-testid="ad-price-container"]>h3',

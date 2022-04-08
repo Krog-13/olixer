@@ -28,7 +28,7 @@ async def on_shutdown(dispatcher):
 
 
 
-@dp.message_handler(commands=['start', 'help'])
+@dp.message_handler(commands='help')
 async def send_message(message: types.Message):
     await message.reply("Hi everybody")
 
@@ -66,21 +66,15 @@ async def unsubscribe(message: types.Message):
 
 async def scrapi():
     all_queries = await db.get_all_query()
-    print(all_queries)
     new_posts = crawler.get_posts(all_queries).__next__()
     return new_posts
 
-@dp.message_handler(commands=['go'])
-async def go(message: types.Message):
-    logging.info('GO go')
-    await message.answer('go')
-
-@dp.message_handler(commands=['goe'])
+@dp.message_handler(commands=['start'])
 async def scheduled(wait_for):
     logging.info('START')
     while True:
         # time out
-        await asyncio.sleep(10)
+        await asyncio.sleep(900)
         posts = await scrapi()
         if not posts['urls']:
             logging.info(f'NOY POST')
@@ -103,11 +97,11 @@ async def scheduled(wait_for):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    loop = asyncio.new_event_loop()
-    loop.create_task(scheduled(10))
+    # loop = asyncio.new_event_loop()
+    # loop.create_task(scheduled(10))
     start_webhook(
         dispatcher=dp,
-        loop=loop,
+        # loop=loop,
         webhook_path=config.WEBHOOK_PATH,
         skip_updates=True,
         on_startup=on_startup,
