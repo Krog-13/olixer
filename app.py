@@ -101,7 +101,7 @@ async def scheduled(wait_for):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     loop.create_task(scheduled(10))
     start_webhook(
         dispatcher=dp,
