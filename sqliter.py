@@ -16,14 +16,20 @@ class Database:
         # # self.conn = DB(config.DB_URL)
         # self.conn = DB('postgresql://spoon:spoon@127.0.0.1:5432/project')
         self.conn = DB(config.DB_URL)
+        # self.conn = DB('postgres://lxfzdnbztxpxsz:130b2f28cbc992e7154427e410aa96ca3337cecf7318fd451df86ab0f187bdfc@ec2-34-247-172-149.eu-west-1.compute.amazonaws.com:5432/d22lk9onn5sn1u')
         # self.conn.connect()
-        # self.conn = DB('postgres://fdhorobeymcpbn:d5c20ca6f5e9d72877d001f43678f0a0cea915cf5493347a4ff454d23022ebc3@ec2-63-32-248-14.eu-west-1.compute.amazonaws.com:5432/db9ob7a7v7mqhc')
         # print('connection ok')
 
-    def update_filters(self, values):
+
+    async def create(self):
+        await self.conn.connect()
+        await self.conn.execute(sql.table1)
+        await self.conn.execute(sql.table2)
+
+    async def update_filters(self, values):
         """Run SQL query to update rows in table"""
         # self.connect()
-        self.conn.execute(sql.query_update_filters, values=values)
+        await self.conn.execute(sql.query_update_filters, values=values)
 
 
     async def subscriber_exists(self, values):
@@ -66,4 +72,4 @@ class Database:
 
 if __name__ == '__main__':
     db = Database()
-    asyncio.run(db.connect())
+    asyncio.run(db.create())

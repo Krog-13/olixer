@@ -16,7 +16,7 @@ query_update_filters = "UPDATE filters SET last_post= :last_post WHERE user_id= 
 table1 = "CREATE TABLE subscribers (id INTEGER PRIMARY KEY, personal_uid INTEGER NOT NULL, status BOOLEAN NOT NULL);"
 
 table2 = "CREATE TABLE filters (id INTEGER PRIMARY KEY, query_post VARCHAR(300), last_post VARCHAR(300), user_id INTEGER," \
-         "CONSTRAINT pk_filters_sub FOREIGN KEY(user_id) REFERENCES subscribersq (id));"
+         "CONSTRAINT pk_filters_sub FOREIGN KEY(user_id) REFERENCES subscribers (id));"
 
 query = "DROP TABLE subscribersq"
 query1 = "DROP TABLE filtersq"
