@@ -76,7 +76,6 @@ async def go(message: types.Message):
 
 
 async def scheduled(wait_for):
-
     while True:
         # time out
         await asyncio.sleep(wait_for)
@@ -101,6 +100,7 @@ async def scheduled(wait_for):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     start_webhook(
+        loop=asyncio.get_event_loop().create_task(scheduled(20)),
         dispatcher=dp,
         webhook_path=config.WEBHOOK_PATH,
         skip_updates=True,
