@@ -49,18 +49,19 @@ class Olixer(Crawler):
 
     def new_posts(self, page):
         self.initialization()
-        self.source_html = self.source_page(page['query_post'])
+        self.source_html = self.source_page(page.get('query_post'))
         urls = self.source_html.select('table#offers_table h3>a[href]', limit=10, href=True)
         # urls_top = self.source_html.select('table.offers--top h3>a', limit=8, href=True)
         for url in urls:
-            if url['href'] == page['last_post']:
+            if url['href'] == page.get('last_post'):
                 break
             self.posts['urls'].append(url['href'])
-        self.posts['id'] = page['user_id']
+        self.posts['id'] = page.get('user_id')
         return self.posts
 
     def get_posts(self, all_queries):
         for page in all_queries:
+            print(page)
             posts = self.new_posts(page)
             yield posts
 

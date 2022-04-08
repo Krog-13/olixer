@@ -11,12 +11,8 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=config.API_KEY)
 dp = Dispatcher(bot)
 
-
-
-
-
 # initialization Database
-db = Database(config)
+db = Database()
 
 # initialization parser
 param={}
@@ -39,22 +35,22 @@ async def send_message(message: types.Message):
 # command subscribe
 @dp.message_handler(commands=['subscribe'])
 async def subscribe(message: types.message):
-    if not db.subscriber_exists(user_uid=message.from_user.id):
-        db.add_subscriber(message.from_user.id, True)
+    if not db.subscriber_exists(values={'uid': message.from_user.id}):
+        db.add_subscriber(values= {'uid': message.from_user.id,'status': True})
         await message.answer('Вы успешно подписались на рассылку! OLX')
     else:
-        db.update_subscription(message.from_user.id, True)
+        db.update_subscription(values= {'uid': message.from_user.id,'status': True})
         await message.answer('Подписка активирована')
 
 
 # command unsubscribe
 @dp.message_handler(commands=['unsubscribe'])
 async def unsubscribe(message: types.Message):
-    if(not db.subscriber_exists(message.from_user.id)):
-        db.add_subscriber(message.from_user.id, False)
+    if not db.subscriber_exists(values={'uid': message.from_user.id}):
+        db.add_subscriber(values= {'uid': message.from_user.id,'status': False})
         await message.answer('Вы отписаны')
     else:
-        db.update_subscription(message.from_user.id, False)
+        db.update_subscription(values= {'uid': message.from_user.id,'status': False})
         await message.answer('Вы успешно отписаны от рассылки')
 
 @dp.message_handler(commands=['filter'])
@@ -71,15 +67,18 @@ async def unsubscribe(message: types.Message):
     await message.answer('Your filters successfully added')
 
 async def scrapi():
-    all_queries = db.get_all_query()
+    all_queries = await db.get_all_query()
+    print(all_queries)
     new_posts = crawler.get_posts(all_queries).__next__()
     return new_posts
+
 @dp.message_handler(commands=['go'])
 async def go(message: types.Message):
     await message.answer('go')
 
 
 async def scheduled(wait_for):
+
     while True:
         # time out
         await asyncio.sleep(wait_for)
@@ -88,7 +87,7 @@ async def scheduled(wait_for):
             continue
         new_url = posts['urls'][0]
         id = posts['id']
-        db.update_filters(new_url, id)
+        db.update_filters(values= {'last_post': new_url,'user_id': id})
         logging.info(len(posts['urls']))
         for url in posts['urls']:
             one = crawler.get_info_post(url)
@@ -112,8 +111,7 @@ if __name__ == '__main__':
         host=config.WEBAPP_HOST,
         port=config.WEBAPP_PORT
     )
-
-    loop = asyncio.get_event_loop()
-    loop.create_task(scheduled(20))
-    executor.start_polling(dp, skip_updates=True)
+    # loop = asyncio.get_event_loop()
+    # loop.create_task(scheduled(80))
+    # executor.start_polling(dp, skip_updates=True)
 
