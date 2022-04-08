@@ -18,11 +18,13 @@ db = Database()
 param={}
 crawler = Olixer(param)
 
-async def on_startup(dispatcher):
+async def on_startup():
+    loop = asyncio.new_event_loop()
+    loop.create_task(scheduled(10))
     await db.conn.connect()
     await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True)
 
-async def on_shutdown(dispatcher):
+async def on_shutdown():
     await db.conn.disconnect()
     await bot.delete_webhook()
 
