@@ -35,7 +35,7 @@ async def send_message(message: types.Message):
 # command subscribe
 @dp.message_handler(commands=['subscribe'])
 async def subscribe(message: types.message):
-    if not db.subscriber_exists(values={'uid': message.from_user.id}):
+    if not await db.subscriber_exists(values={'uid': message.from_user.id}):
         await db.add_subscriber(values= {'uid': message.from_user.id,'status': True})
         await message.answer('Вы успешно подписались на рассылку! OLX')
     else:
