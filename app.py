@@ -44,7 +44,7 @@ async def subscribe(message: types.message):
 # command unsubscribe
 @dp.message_handler(commands=['unsubscribe'])
 async def unsubscribe(message: types.Message):
-    if not db.subscriber_exists(values={'uid': message.from_user.id}):
+    if not await db.subscriber_exists(values={'uid': message.from_user.id}):
         await db.add_subscriber(values= {'uid': message.from_user.id,'status': False})
         await message.answer('Вы отписаны')
     else:
@@ -100,10 +100,10 @@ async def scheduled(wait_for):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     loop = asyncio.get_event_loop()
-    loop.create_task(scheduled(10))
+    # loop.create_task(scheduled(10))
     start_webhook(
         dispatcher=dp,
-        loop=loop,
+        loop=loop.create_task(scheduled(20)),
         webhook_path=config.WEBHOOK_PATH,
         skip_updates=True,
         on_startup=on_startup,
