@@ -82,11 +82,12 @@ async def scheduled(wait_for):
         # time out
         await asyncio.sleep(10)
         posts = await scrapi()
-        logging.info(posts, '<==start')
         if not posts['urls']:
+            logging.info(f'NOY POST')
             continue
         new_url = posts['urls'][0]
         id = posts['id']
+        logging.info(f'{id}----id-----')
         await db.update_filters(values= {'last_post': new_url,'user_id': id})
         logging.info(len(posts['urls']))
         for url in posts['urls']:
