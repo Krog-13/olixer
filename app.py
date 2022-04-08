@@ -80,8 +80,9 @@ async def scheduled(wait_for):
     logging.info('START')
     while True:
         # time out
-        await asyncio.sleep(wait_for)
+        await asyncio.sleep(10)
         posts = await scrapi()
+        logging.info(posts, '<==start')
         if not posts['urls']:
             continue
         new_url = posts['urls'][0]
