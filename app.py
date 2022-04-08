@@ -69,7 +69,7 @@ async def scrapi():
     new_posts = crawler.get_posts(all_queries).__next__()
     return new_posts
 
-@dp.message_handler(commands=['start'])
+@dp.message_handler(commands=['go'])
 async def scheduled(wait_for):
     logging.info('START')
     while True:
