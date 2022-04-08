@@ -74,7 +74,7 @@ async def scheduled(wait_for):
     logging.info('START')
     while True:
         # time out
-        await asyncio.sleep(900)
+        await asyncio.sleep(60)
         posts = await scrapi()
         if not posts['urls']:
             logging.info(f'NOY POST')
@@ -97,11 +97,11 @@ async def scheduled(wait_for):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    # loop = asyncio.new_event_loop()
-    # loop.create_task(scheduled(10))
+    loop = asyncio.new_event_loop()
+    loop.create_task(scheduled(60))
     start_webhook(
         dispatcher=dp,
-        # loop=loop,
+        loop=loop,
         webhook_path=config.WEBHOOK_PATH,
         skip_updates=True,
         on_startup=on_startup,
