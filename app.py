@@ -36,10 +36,10 @@ async def send_message(message: types.Message):
 @dp.message_handler(commands=['subscribe'])
 async def subscribe(message: types.message):
     if not db.subscriber_exists(values={'uid': message.from_user.id}):
-        db.add_subscriber(values= {'uid': message.from_user.id,'status': True})
+        await db.add_subscriber(values= {'uid': message.from_user.id,'status': True})
         await message.answer('Вы успешно подписались на рассылку! OLX')
     else:
-        db.update_subscription(values= {'uid': message.from_user.id,'status': True})
+        await db.update_subscription(values= {'uid': message.from_user.id,'status': True})
         await message.answer('Подписка активирована')
 
 
@@ -47,10 +47,10 @@ async def subscribe(message: types.message):
 @dp.message_handler(commands=['unsubscribe'])
 async def unsubscribe(message: types.Message):
     if not db.subscriber_exists(values={'uid': message.from_user.id}):
-        db.add_subscriber(values= {'uid': message.from_user.id,'status': False})
+        await db.add_subscriber(values= {'uid': message.from_user.id,'status': False})
         await message.answer('Вы отписаны')
     else:
-        db.update_subscription(values= {'uid': message.from_user.id,'status': False})
+        await db.update_subscription(values= {'uid': message.from_user.id,'status': False})
         await message.answer('Вы успешно отписаны от рассылки')
 
 @dp.message_handler(commands=['filter'])
@@ -63,7 +63,7 @@ async def unsubscribe(message: types.Message):
     if not crawler.correct_address(olx_query):
         await message.answer('URL not correct.\n Try again')
         return
-    db.add_filters(olx_query, message.from_user.id)
+    await db.add_filters(olx_query, message.from_user.id)
     await message.answer('Your filters successfully added')
 
 async def scrapi():
@@ -87,7 +87,7 @@ async def scheduled(wait_for):
             continue
         new_url = posts['urls'][0]
         id = posts['id']
-        db.update_filters(values= {'last_post': new_url,'user_id': id})
+        await db.update_filters(values= {'last_post': new_url,'user_id': id})
         logging.info(len(posts['urls']))
         for url in posts['urls']:
             one = crawler.get_info_post(url)
