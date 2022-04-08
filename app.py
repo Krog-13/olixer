@@ -41,8 +41,6 @@ async def subscribe(message: types.message):
     else:
         await db.update_subscription(values= {'uid': message.from_user.id,'status': True})
         await message.answer('Подписка активирована')
-
-
 # command unsubscribe
 @dp.message_handler(commands=['unsubscribe'])
 async def unsubscribe(message: types.Message):
@@ -63,7 +61,7 @@ async def unsubscribe(message: types.Message):
     if not crawler.correct_address(olx_query):
         await message.answer('URL not correct.\n Try again')
         return
-    await db.add_filters(olx_query, message.from_user.id)
+    await db.add_filters(values= {'uid': message.from_user.id, 'query_post': olx_query})
     await message.answer('Your filters successfully added')
 
 async def scrapi():

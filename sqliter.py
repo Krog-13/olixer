@@ -50,19 +50,14 @@ class Database:
         await self.conn.execute(sql.query_update, values=values)
 
 
-    def add_filters(self, olx_query, user_uid):
+    async def add_filters(self, values):
         """Run SQL query to add filter"""
-        with self.conn.cursor() as curs:
-            curs.execute("SELECT id FROM subscribers WHERE personal_uid=%s", (user_uid, ))
-            id = curs.fetchone()
-            curs.execute('SELECT * FROM filters WHERE user_id=%s', id)
-            exists_filter = curs.fetchone()
-            if exists_filter:
-                curs.execute(sql.query_filter_update, (olx_query, id[0]))
-            else:
-                curs.execute(sql.query_filter, (olx_query, id))
-            self.conn.commit()
-            curs.close()
+        record = await self.conn.fetch_one(sql.query_person, values={'uid': values.get('uid')})
+        flag = self.conn.fetch_one(sql.query_exist_filter,values={"user_id": record[0]})
+        if flag:
+            await self.conn.execute(sql.query_filter_update, values={'query_post':values.get('query_post'), 'user_id':record[0]})
+        else:
+            await self.conn.execute(sql.query_filter, values={'query_post':values.get('query_post'), 'user_id':record[0]})
 
     async def get_all_query(self):
         # self.connect()
@@ -72,4 +67,5 @@ class Database:
 
 if __name__ == '__main__':
     db = Database()
-    asyncio.run(db.create())
+    values = {'uid':838019137, 'query_post': 'https'}
+    asyncio.run(db.add_filters(values))
