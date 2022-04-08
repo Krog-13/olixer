@@ -4,7 +4,7 @@ import os
 import time
 
 from aiogram import Bot, Dispatcher, executor, types
-from aiogram.utils.executor import start_webhook
+from aiogram.utils.executor import start_webhook, set_webhook
 import config
 from sqliter import Database
 from olx import Olixer
@@ -22,6 +22,8 @@ crawler = Olixer(param)
 async def on_startup(dp):
     await db.conn.connect()
     await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True)
+    loop = asyncio.get_event_loop()
+    loop.create_task(scheduled(10))
 
 async def on_shutdown(dp):
     await db.conn.disconnect()
@@ -74,19 +76,14 @@ async def scrapi():
     new_posts = crawler.get_posts(all_queries).__next__()
     return new_posts
 
-@dp.message_handler(commands=['gogo'])
-def scheduled(message:types.Message):
-    while True:
-        time.sleep(10)
-        message.answer('Your filters successfully added')
 
-
-@dp.message_handler(commands=['go'])
+# @dp.message_handler(commands=['go'])
 async def scheduled(wait_for):
-    logging.info('START')
+    logging.info('START is done')
     while True:
         # time out
-        await asyncio.sleep(60)
+        logging.warning('here')
+        # await asyncio.sleep(60)
         posts = await scrapi()
         if not posts['urls']:
             logging.info('NOY POST')
@@ -110,11 +107,12 @@ async def scheduled(wait_for):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    loop = asyncio.new_event_loop()
-    loop.create_task(scheduled(60))
+    # loop = asyncio.new_event_loop()
+    # loop.create_task(scheduled(10))
+
     start_webhook(
         dispatcher=dp,
-        loop=loop,
+        # loop=loop,
         webhook_path=config.WEBHOOK_PATH,
         skip_updates=True,
         on_startup=on_startup,
