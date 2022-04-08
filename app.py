@@ -23,7 +23,7 @@ async def on_startup(dp):
     await db.conn.connect()
     await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True)
     loop = asyncio.get_event_loop()
-    loop.create_task(scheduled(10))
+    loop.create_task(scheduled(20))
 
 async def on_shutdown(dp):
     await db.conn.disconnect()
@@ -79,11 +79,10 @@ async def scrapi():
 
 # @dp.message_handler(commands=['go'])
 async def scheduled(wait_for):
-    logging.info('START is done')
+    logging.info('START')
     while True:
         # time out
-        logging.warning('here')
-        # await asyncio.sleep(60)
+        await asyncio.sleep(wait_for)
         posts = await scrapi()
         if not posts['urls']:
             logging.info('NOY POST')
