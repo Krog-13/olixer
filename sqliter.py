@@ -3,6 +3,7 @@ import asyncio
 import logging
 logging.basicConfig(level=logging.INFO)
 from databases import Database as DB
+import config
 
 database = DB('postgresql:spoon:spoon//127.0.0.1/project',)
 
