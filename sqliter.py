@@ -53,7 +53,9 @@ class Database:
     async def add_filters(self, values):
         """Run SQL query to add filter"""
         record = await self.conn.fetch_one(sql.query_person, values={'uid': values.get('uid')})
-        flag = self.conn.fetch_one(sql.query_exist_filter,values={"user_id": record[0]})
+        if not record[0]:
+            return
+        flag = await self.conn.fetch_one(sql.query_exist_filter,values={"user_id": record[0]})
         if flag:
             await self.conn.execute(sql.query_filter_update, values={'query_post':values.get('query_post'), 'user_id':record[0]})
         else:
