@@ -77,8 +77,9 @@ async def scheduled(wait_for):
         await asyncio.sleep(60)
         posts = await scrapi()
         if not posts['urls']:
-            logging.info(f'NOY POST')
+            logging.info('NOY POST')
             continue
+        logging.info('POST HAVE')
         new_url = posts['urls'][0]
         id = posts['id']
         logging.info(f'{id}----id-----')
