@@ -41,3 +41,4 @@ WEBAPP_PORT = os.getenv('PORT', default=5000)
 
 
 # start pgadmin-web sudo /usr/pgadmin4/bin/setup-web.sh
+#  heroku ps:scale web=0 - stop app heroku web=1 start

@@ -1,10 +1,8 @@
 import asyncio
 import logging
-import os
-import time
-
 from aiogram import Bot, Dispatcher, executor, types
-from aiogram.utils.executor import start_webhook, set_webhook
+from aiogram.utils.executor import start_webhook
+from aiogram.utils.markdown import link
 import config
 from sqliter import Database
 from olx import Olixer
@@ -23,17 +21,14 @@ async def on_startup(dp):
     await db.conn.connect()
     await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True)
     loop = asyncio.get_event_loop()
-    loop.create_task(scheduled(20))
+    loop.create_task(scheduled(500))
 
 async def on_shutdown(dp):
     await db.conn.disconnect()
     await bot.delete_webhook()
     await dp.storage.close()
     await dp.storage.wait_closed()
-
     logging.warning('Bay!')
-
-
 
 @dp.message_handler(commands='help')
 async def send_message(message: types.Message):
@@ -48,6 +43,7 @@ async def subscribe(message: types.message):
     else:
         await db.update_subscription(values= {'uid': message.from_user.id,'status': True})
         await message.answer('Подписка активирована')
+
 # command unsubscribe
 @dp.message_handler(commands=['unsubscribe'])
 async def unsubscribe(message: types.Message):
@@ -76,8 +72,6 @@ async def scrapi():
     new_posts = crawler.get_posts(all_queries).__next__()
     return new_posts
 
-
-# @dp.message_handler(commands=['go'])
 async def scheduled(wait_for):
     logging.info('START')
     while True:
@@ -87,10 +81,8 @@ async def scheduled(wait_for):
         if not posts['urls']:
             logging.info('NOY POST')
             continue
-        logging.info('POST HAVE')
         new_url = posts['urls'][0]
         id = posts['id']
-        logging.info(f'{id}----id-----')
         await db.update_filters(values= {'last_post': new_url,'user_id': id})
         logging.info(len(posts['urls']))
         for url in posts['urls']:
@@ -100,18 +92,14 @@ async def scheduled(wait_for):
                 838019137,
                 photo,
                 caption=one['title'] + '\n' + 'Цена:' + one['price'] + 'От:' + '\nОписание:'
-                        + one['text'].strip()[:400] + url, disable_notification=True)
+                        + one['text'].strip()[:400] + link('\nclick', url), disable_notification=True, parse_mode='markdown')
             photo.close()
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    # loop = asyncio.new_event_loop()
-    # loop.create_task(scheduled(10))
-
     start_webhook(
         dispatcher=dp,
-        # loop=loop,
         webhook_path=config.WEBHOOK_PATH,
         skip_updates=True,
         on_startup=on_startup,
@@ -119,7 +107,4 @@ if __name__ == '__main__':
         host=config.WEBAPP_HOST,
         port=config.WEBAPP_PORT
     )
-    # loop = asyncio.get_event_loop()
-    # loop.create_task(scheduled(80))
-    # executor.start_polling(dp, skip_updates=True)
 
