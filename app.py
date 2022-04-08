@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import time
 
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.utils.executor import start_webhook
@@ -19,14 +20,16 @@ param={}
 crawler = Olixer(param)
 
 async def on_startup(dp):
-    loop = asyncio.new_event_loop()
-    loop.create_task(scheduled(10))
     await db.conn.connect()
     await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True)
 
 async def on_shutdown(dp):
     await db.conn.disconnect()
     await bot.delete_webhook()
+    await dp.storage.close()
+    await dp.storage.wait_closed()
+
+    logging.warning('Bay!')
 
 
 
@@ -70,6 +73,13 @@ async def scrapi():
     all_queries = await db.get_all_query()
     new_posts = crawler.get_posts(all_queries).__next__()
     return new_posts
+
+@dp.message_handler(commands=['gogo'])
+def scheduled(message:types.Message):
+    while True:
+        time.sleep(10)
+        message.answer('Your filters successfully added')
+
 
 @dp.message_handler(commands=['go'])
 async def scheduled(wait_for):
