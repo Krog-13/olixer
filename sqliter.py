@@ -35,14 +35,14 @@ class Database:
     async def subscriber_exists(self, values):
         """Run SQL query to check exists user"""
         # self.connect()
-        record = await self.conn.fetch_all(sql.query_exists, values=values)
+        record = await self.conn.fetch_one(sql.query_exists, values=values)
         return record
 
     async def add_subscriber(self, values):
         """Run SQL query to check exists user"""
         # self.connect()
         await self.conn.execute(sql.query_add, values=values)
-        return True
+
 
     async def update_subscription(self, values):
         """Run SQL query to check exists user"""
@@ -53,7 +53,7 @@ class Database:
     async def add_filters(self, values):
         """Run SQL query to add filter"""
         record = await self.conn.fetch_one(sql.query_person, values={'uid': values.get('uid')})
-        if not record[0]:
+        if not record:
             return
         flag = await self.conn.fetch_one(sql.query_exist_filter,values={"user_id": record[0]})
         if flag:
