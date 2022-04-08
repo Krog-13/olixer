@@ -36,7 +36,7 @@ class Crawler:
         return True
 
 class Olixer(Crawler):
-    def __init__(self, param=None):
+    def __init__(self):
         super().__init__()
         self.posts = {}
         self.initialization()
@@ -94,13 +94,6 @@ class Olixer(Crawler):
         return data
 
 
-
-
-
-
-
-
 if __name__ == '__main__':
     param = {'address':'/elektronika/astana/'}
-    t1 = Olixer(param, 1)
-    t1.last_post()
+

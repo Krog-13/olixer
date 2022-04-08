@@ -14,6 +14,7 @@ query_get_filters = "SELECT query_post, last_post, user_id FROM filters"
 query_update_filters = "UPDATE filters SET last_post= :last_post WHERE user_id= :user_id"
 query_person = "SELECT id FROM subscribers WHERE personal_uid=:uid"
 query_exist_filter = "SELECT * FROM filters WHERE user_id=:user_id"
+query_send_user = "SELECT personal_uid FROM subscribers WHERE id=:id"
 
 table1 = "CREATE TABLE subscribers (id INTEGER PRIMARY KEY, personal_uid INTEGER NOT NULL, status BOOLEAN NOT NULL);"
 

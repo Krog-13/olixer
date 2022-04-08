@@ -1,7 +1,3 @@
-import psycopg2
-from psycopg2.extras import RealDictCursor
-
-import config
 import sql
 import asyncio
 import logging
@@ -18,7 +14,6 @@ class Database:
         self.conn = DB(config.DB_URL)
         # self.conn = DB('postgres://lxfzdnbztxpxsz:130b2f28cbc992e7154427e410aa96ca3337cecf7318fd451df86ab0f187bdfc@ec2-34-247-172-149.eu-west-1.compute.amazonaws.com:5432/d22lk9onn5sn1u')
         # self.conn.connect()
-        # print('connection ok')
 
 
     async def create(self):
@@ -34,7 +29,6 @@ class Database:
 
     async def subscriber_exists(self, values):
         """Run SQL query to check exists user"""
-        # self.connect()
         record = await self.conn.fetch_one(sql.query_exists, values=values)
         return record
 
@@ -62,10 +56,14 @@ class Database:
             await self.conn.execute(sql.query_filter, values={'query_post':values.get('query_post'), 'user_id':record[0]})
 
     async def get_all_query(self):
-        # self.connect()
+        """Run SQL query to get queries"""
         record = await self.conn.fetch_all(sql.query_get_filters)
         return record
 
+    async def get_user_id(self, values):
+        """Run SQL query to get user uid bot"""
+        record = await self.conn.fetch_one(sql.query_send_user, values=values)
+        return record
 
 if __name__ == '__main__':
     db = Database()
