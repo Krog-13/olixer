@@ -72,10 +72,12 @@ async def scrapi():
 
 @dp.message_handler(commands=['go'])
 async def go(message: types.Message):
+    logging.info('GO go')
     await message.answer('go')
 
 
 async def scheduled(wait_for):
+    logging.info('START')
     while True:
         # time out
         await asyncio.sleep(wait_for)
@@ -99,11 +101,12 @@ async def scheduled(wait_for):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    loop = asyncio.get_event_loop()
+    # loop = asyncio.get_event_loop()
     # loop.create_task(scheduled(10))
+    dp.loop.create_task(scheduled(10))
     start_webhook(
         dispatcher=dp,
-        loop=loop.create_task(scheduled(20)),
+        # loop=loop,
         webhook_path=config.WEBHOOK_PATH,
         skip_updates=True,
         on_startup=on_startup,
