@@ -78,7 +78,7 @@ async def unsubscribe(message: types.Message):
 async def scrapi():
     """Craw new post from user's post query"""
     all_queries = await db.get_all_query()
-    new_posts = crawler.get_posts(all_queries).__next__()
+    new_posts = crawler.get_posts(all_queries)
     return new_posts
 
 
@@ -90,25 +90,26 @@ async def scheduled(wait_for):
     while True:
         # time out
         await asyncio.sleep(wait_for)
-        posts = await scrapi()
-        if not posts['urls']:
-            logging.info('NOY POST')
-            continue
-        new_url = posts['urls'][0]
-        id = posts['id']
-        await db.update_filters(values= {'last_post': new_url,'user_id': id})
-        logging.info(len(posts['urls']))
-        user_uid = await db.get_user_id(values={'id':id})
-        for url in posts['urls']:
-            # sending new posts
-            one = crawler.get_info_post(url)
-            photo = open('static/fon.png', 'rb')
-            await bot.send_photo(
-                user_uid[0],
-                photo,
-                caption=one['title'] + '\n' + 'Цена:' + one['price'] + 'От:' + '\nОписание:'
-                        + one['text'].strip()[:400] + link('\nclick', url), disable_notification=True, parse_mode='markdown')
-            photo.close()
+        for posts in await scrapi():
+            if not posts['urls']:
+                logging.info('NOY POST')
+                continue
+            new_url = posts['urls'][0]
+            id = posts['id']
+            await db.update_filters(values= {'last_post': new_url,'user_id': id})
+            logging.info(len(posts['urls']))
+            user_uid = await db.get_user_id(values={'id':id})
+            logging.info(user_uid[0])
+            for url in posts['urls']:
+                # sending new posts
+                one = crawler.get_info_post(url)
+                photo = open('static/fon.png', 'rb')
+                await bot.send_photo(
+                    user_uid[0],
+                    photo,
+                    caption=one['title'] + '\n' + 'Цена:' + one['price'] + 'От:' + '\nОписание:'
+                            + one['text'].strip()[:400] + link('\nclick', url), disable_notification=True, parse_mode='markdown')
+                photo.close()
 
 
 if __name__ == '__main__':
