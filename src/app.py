@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.utils.markdown import link
 import config
 from sqliter import Database
 from olx import Olixer
@@ -57,7 +58,7 @@ async def unsubscribe(message: types.Message):
 
 async def scrapi():
     all_queries = db.get_all_query()
-    new_posts = crawler.get_posts(all_queries).__next__()
+    new_posts = crawler.get_posts(all_queries)
     return new_posts
 @dp.message_handler(commands=['go'])
 async def go(message: types.Message):
@@ -67,23 +68,34 @@ async def go(message: types.Message):
 async def scheduled(wait_for):
     while True:
         # time out
+        LOGGER.debug(f'sleep-->{wait_for}')
         await asyncio.sleep(wait_for)
-        posts = await scrapi()
-        if not posts['urls']:
-            LOGGER.debug('Not post')
-            continue
-        new_url = posts['urls'][0]
-        id = posts['id']
-        db.update_filters(new_url, id)
-        LOGGER.debug(len(posts['urls']))
-        for url in posts['urls']:
-            one = crawler.get_info_post(url)
-            await bot.send_message(
-                838019137, text=one['title']+'\t'+one['price']+'\t'+one['text'])
+        for posts in await scrapi():
+        # posts = await scrapi()
+            if not posts['urls']:
+                LOGGER.debug('Not post')
+                continue
+            new_url = posts['urls'][0]
+            id = posts['id']
+            db.update_filters(new_url, id)
+            LOGGER.debug(len(posts['urls']))
+            for url in posts['urls']:
+                # sending new posts
+                one = crawler.get_info_post(url)
+                photo = open('static/fon.png', 'rb')
+                user_uid = db.get_user_id(id)
+                LOGGER.debug(user_uid['personal_uid'])
+                await bot.send_photo(
+                    user_uid['personal_uid'],
+                    photo,
+                    caption=one['title'] + '\n' + 'Цена:' + one['price'] + 'От:' + '\nОписание:'
+                            + one['text'].strip()[:400] + link('\nclick', url), disable_notification=True,
+                    parse_mode='markdown')
+                photo.close()
 
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.create_task(scheduled(20))
+    loop.create_task(scheduled(5))
     executor.start_polling(dp, skip_updates=True)
 

@@ -122,5 +122,13 @@ class Database:
             record = curs.fetchall()
         return record
 
+    def get_user_id(self, values):
+        """Run SQL query to get user uid bot"""
+        self.connect()
+        with self.conn.cursor(cursor_factory=RealDictCursor) as curs:
+            curs.execute(sql.query_send_user, (values,))
+            record = curs.fetchone()
+        return record
+
     def close(self):
         self.conn.close()
