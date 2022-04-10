@@ -71,7 +71,6 @@ async def scheduled(wait_for):
         LOGGER.debug(f'sleep-->{wait_for}')
         await asyncio.sleep(wait_for)
         for posts in await scrapi():
-        # posts = await scrapi()
             if not posts['urls']:
                 LOGGER.debug('Not post')
                 continue
