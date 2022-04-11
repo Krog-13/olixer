@@ -10,7 +10,9 @@ query_filter = "INSERT INTO filters (query_post, user_id) VALUES (:query_post, :
 query_filter_update = "UPDATE filters SET query_post = :query_post WHERE user_id = :user_id"
 query_update = "UPDATE subscribers SET status = :status WHERE personal_uid = :uid"
 query_update_f = "UPDATE subscribers SET filters_id = %s WHERE personal_uid = %s"
-query_get_filters = "SELECT query_post, last_post, user_id FROM filters"
+query_get_filters = "SELECT query_post, last_post, user_id FROM filters " \
+                    "LEFT JOIN subscribers ON filters.user_id=subscribers.id" \
+                    "WHERE status = true"
 query_update_filters = "UPDATE filters SET last_post= :last_post WHERE user_id= :user_id"
 query_person = "SELECT id FROM subscribers WHERE personal_uid=:uid"
 query_exist_filter = "SELECT * FROM filters WHERE user_id=:user_id"

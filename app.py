@@ -21,7 +21,7 @@ async def on_startup(dp):
     await db.conn.connect()
     await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True)
     loop = asyncio.get_event_loop()
-    loop.create_task(scheduled(500))
+    loop.create_task(scheduled(3600))
 
 
 async def on_shutdown(dp):
@@ -89,6 +89,7 @@ async def scheduled(wait_for):
     logging.info('START')
     while True:
         # time out
+        logging.warning(f'Waiting {wait_for} seconds...')
         await asyncio.sleep(wait_for)
         for posts in await scrapi():
             if not posts['urls']:
@@ -98,7 +99,7 @@ async def scheduled(wait_for):
             id = posts['id']
             await db.update_filters(values= {'last_post': new_url,'user_id': id})
             logging.info(len(posts['urls']))
-            user_uid = await db.get_user_id(values={'id':id})
+            user_uid = await db.get_user_id(values={'id': id})
             logging.info(user_uid[0])
             for url in posts['urls']:
                 # sending new posts
@@ -107,8 +108,8 @@ async def scheduled(wait_for):
                 await bot.send_photo(
                     user_uid[0],
                     photo,
-                    caption=one['title'] + '\n' + 'Цена:' + one['price'] + 'От:' + '\nОписание:'
-                            + one['text'].strip()[:400] + link('\nclick', url), disable_notification=True, parse_mode='markdown')
+                    caption=one['title'] +'\nЦена:' + one['price'] + '\nОписание:'
+                            + one['text'].strip()[:400] + link('\nlink', url), disable_notification=True, parse_mode='markdown')
                 photo.close()
 
 
