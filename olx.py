@@ -93,6 +93,8 @@ class Olixer(Crawler):
         data = self.extract_data(url)
         return data
 
+    def pushix(self):
+        pass
 
 if __name__ == '__main__':
     param = {'address':'/elektronika/astana/'}
