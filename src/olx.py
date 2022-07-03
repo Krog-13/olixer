@@ -26,13 +26,12 @@ class Crawler:
             raise SystemExit(e)
         return BS(source_page.content, 'lxml')
 
-
-
     def correct_address(self, address):
         return True
 
+
 class Olixer(Crawler):
-    def __init__(self, param=None):
+    def __init__(self):
         super().__init__()
         self.posts = {}
         self.initialization()
@@ -69,6 +68,7 @@ class Olixer(Crawler):
         self.data['text'] = text
         self.data['price'] = price
         return self.data
+
     def get_datetime(self):
         pass
 

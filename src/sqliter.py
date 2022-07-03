@@ -64,7 +64,7 @@ class Database:
             cur.close()
             return f"{cur.rowcount} rows affected"
 
-    def update_filters(self, simple,uid):
+    def update_filters(self, simple, uid):
         """Run SQL query to update rows in table"""
         self.connect()
         with self.conn.cursor() as cur:
@@ -115,10 +115,10 @@ class Database:
             self.conn.commit()
             curs.close()
 
-    def get_all_query(self):
+    def get_all_query(self, values):
         self.connect()
         with self.conn.cursor(cursor_factory=RealDictCursor) as curs:
-            curs.execute(sql.query_get_filters)
+            curs.execute(sql.query_get_filters, (values,))
             record = curs.fetchall()
         return record
 

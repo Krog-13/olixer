@@ -15,7 +15,7 @@ db = Database(config)
 
 # initialization parser
 param={}
-crawler = Olixer(param)
+crawler = Olixer()
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -56,19 +56,24 @@ async def unsubscribe(message: types.Message):
     db.add_filters(olx_query, message.from_user.id)
     await message.answer('Your filters successfully added')
 
+
 async def scrapi():
-    all_queries = db.get_all_query()
+    """Craw new post from user's post query"""
+    all_queries = db.get_all_query(True)
     new_posts = crawler.get_posts(all_queries)
     return new_posts
+
+
 @dp.message_handler(commands=['go'])
 async def go(message: types.Message):
     await message.answer('go')
 
 
 async def scheduled(wait_for):
+    LOGGER.info('START')
     while True:
         # time out
-        LOGGER.debug(f'sleep-->{wait_for}')
+        LOGGER.debug(f'Sleeping... {wait_for}')
         await asyncio.sleep(wait_for)
         for posts in await scrapi():
             if not posts['urls']:
@@ -77,12 +82,12 @@ async def scheduled(wait_for):
             new_url = posts['urls'][0]
             id = posts['id']
             db.update_filters(new_url, id)
+            user_uid = db.get_user_id(id)
             LOGGER.debug(len(posts['urls']))
             for url in posts['urls']:
                 # sending new posts
                 one = crawler.get_info_post(url)
                 photo = open('static/fon.png', 'rb')
-                user_uid = db.get_user_id(id)
                 LOGGER.debug(user_uid['personal_uid'])
                 await bot.send_photo(
                     user_uid['personal_uid'],
@@ -95,6 +100,6 @@ async def scheduled(wait_for):
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.create_task(scheduled(5))
+    loop.create_task(scheduled(300))
     executor.start_polling(dp, skip_updates=True)
 

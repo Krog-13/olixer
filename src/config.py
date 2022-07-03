@@ -30,3 +30,6 @@ selector = {
     'phone': '',
     'img': ''
 }
+
+# start pgadmin-web sudo /usr/pgadmin/bin/setup-web.sh
+# login: virtualspook@gmail.com; pass: postgres
