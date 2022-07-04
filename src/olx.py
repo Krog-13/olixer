@@ -13,6 +13,14 @@ logger.setLevel(logging.INFO)
 handler = StreamHandler(stream=sys.stdout)
 logger.debug('start')
 
+_news_page_map = {
+    'title': '_extract_string',
+    'text': '_extract_text',
+    'price': '_extract_price',
+    # 'author': '_extract_string',
+    'datetime': '_extract_datetime',
+    # 'photo': '_extract_photo'
+}
 
 class Crawler:
 
@@ -63,16 +71,48 @@ class Olixer(Crawler):
             posts = self.new_posts(page)
             yield posts
 
-    def get_info_post(self, url):
+    def extract_data(self, url):
+        data = {}
         self.source_html = self.source_page(url)
-        title = self.source_html.select('h1[data-cy="ad_title"]')[0].text
-        text = self.source_html.select(config.selector.get('text'))[0].text
-        price = self.source_html.select(config.selector.get('price'))[0].text
-        self.data['title'] = title
-        self.data['text'] = text
-        self.data['price'] = price
-        return self.data
+        for name, selector in config.selector.items():
+            extractor = getattr(self, '_extract_all')
+            try:
+                value = extractor(selector, name)
+            except:
+                continue
+            data[name] = value
+        return data
 
-    def get_datetime(self):
-        pass
+    def _extract_string(self, selector):
+        item = self.source_html.select(selector)
+        if not item:
+            LOGGER.info('Not title')
+            return ''
+        return item[0].text
+    # def _extract_text(self, selector):
+    #     item = self.source_html.select(selector)[0].text
+    #     return item
+    # def _extract_datetime(self, selector):
+    #     item = self.source_html.select(selector)[0].text
+    #     return item
+    # def _extract_price(self, selector):
+    #     item = self.source_html.select(selector)[0].text
+    #     return item
+    # def _extract_author(self, selector):
+    #     item = self.source_html.select(selector)[0].text
+    #     return item
+
+    def _extract_all(self, selector, name):
+        item = self.source_html.select(selector)
+        if not item:
+            LOGGER.debug(f'not found {name}')
+            return '*-*'
+        return item[0].text
+
+    def get_info_post(self, url):
+        data = self.extract_data(url)
+        return data
+
+
+
 
