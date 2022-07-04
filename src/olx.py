@@ -21,7 +21,10 @@ class Crawler:
 
     def source_page(self, page):
         try:
-            source_page = requests.get(page)
+            if page.startswith("http"):
+                source_page = requests.get(page)
+            else:
+                source_page = requests.get(SOURCE_URL+page)
         except requests.exceptions.RequestException as e:
             raise SystemExit(e)
         return BS(source_page.content, 'lxml')
@@ -45,7 +48,8 @@ class Olixer(Crawler):
     def new_posts(self, page):
         self.initialization()
         self.source_html = self.source_page(page['query_post'])
-        urls = self.source_html.select('table#offers_table h3>a[href]', limit=10, href=True)
+        # urls = self.source_html.select('table#offers_table h3>a[href]', limit=10, href=True)
+        urls = self.source_html.select('div[data-testid=listing-grid] a[href]', limit=10, href=True)
         # urls_top = self.source_html.select('table.offers--top h3>a', limit=8, href=True)
         for url in urls:
             if url['href'] == page['last_post']:
@@ -72,11 +76,3 @@ class Olixer(Crawler):
     def get_datetime(self):
         pass
 
-
-
-
-
-if __name__ == '__main__':
-    param = {'address':'/elektronika/astana/'}
-    t1 = Olixer(param, 1)
-    t1.last_post()

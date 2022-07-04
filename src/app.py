@@ -100,6 +100,6 @@ async def scheduled(wait_for):
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.create_task(scheduled(300))
+    loop.create_task(scheduled(1800))
     executor.start_polling(dp, skip_updates=True)
 
